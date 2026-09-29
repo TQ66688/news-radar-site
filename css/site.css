@@ -1,0 +1,687 @@
+/* ============================================================================
+ * 新闻雷达 · 产品落地页
+ * 设计系统：The Verge —— 取自 VoltAgent/awesome-design-md 的 theverge/DESIGN.md
+ *
+ * 铁律（改动前先读这条）：
+ *   1. 没有浅色模式，#131313 画布就是产品
+ *   2. 零渐变、零 box-shadow 抬升 —— 层级靠 1px 发丝边框或饱和色块
+ *   3. 圆角只用八档：2 / 3 / 4 / 20 / 24 / 30 / 40px / 50%
+ *   4. mono 永不小写（标签/时间戳/kicker 全大写 + 1.1-1.5px 字距）
+ *   5. Anton 只用于 ≥60px 展示字（nav/页脚字标 28-32px 是唯一例外）
+ *   6. mint / 紫外只做 accent，不做背景洗色
+ *   7. 所有链接 hover → #3860be，无下划线；tile 不是链接，hover 完全静止
+ *   8. 中文标签字距用 -cjk 档（0.05-0.08em），不要照抄拉丁的 1.5-1.9px
+ * ========================================================================== */
+
+/* ------------------------------------------------------------------ 字体
+ * 构建期下到本地（tools/fetch_fonts.py）——和主应用一样零 CDN 依赖。
+ * 文件缺失时浏览器静默跳过该 face、落到下一档系统栈，页面不破相。 */
+@font-face { font-family: "Anton"; font-style: normal; font-display: swap;
+             src: url("../fonts/anton-latin.woff2") format("woff2"); }
+/* 再声明一次 900：display 写 900 时拉丁命中本体不合成加粗，
+ * 中文回退到 CJK 栈按 900 渲染（雅黑实渲 700，符合预期） */
+@font-face { font-family: "Anton"; font-style: normal; font-weight: 900; font-display: swap;
+             src: url("../fonts/anton-latin.woff2") format("woff2"); }
+@font-face { font-family: "Space Grotesk"; font-style: normal; font-weight: 300; font-display: swap;
+             src: url("../fonts/space-grotesk-300-latin.woff2") format("woff2"); }
+@font-face { font-family: "Space Grotesk"; font-style: normal; font-weight: 500; font-display: swap;
+             src: url("../fonts/space-grotesk-500-latin.woff2") format("woff2"); }
+@font-face { font-family: "Space Grotesk"; font-style: normal; font-weight: 700; font-display: swap;
+             src: url("../fonts/space-grotesk-700-latin.woff2") format("woff2"); }
+@font-face { font-family: "Space Mono"; font-style: normal; font-weight: 400; font-display: swap;
+             src: url("../fonts/space-mono-400-latin.woff2") format("woff2"); }
+@font-face { font-family: "Space Mono"; font-style: normal; font-weight: 700; font-display: swap;
+             src: url("../fonts/space-mono-700-latin.woff2") format("woff2"); }
+
+/* ------------------------------------------------------------------ 令牌 */
+:root {
+  /* 色板 */
+  --vx-canvas: #131313;
+  --vx-mint: #3cffd0;
+  --vx-ultraviolet: #5200ff;
+  --vx-ultraviolet-90: rgba(82, 0, 255, .9);
+  --vx-slate: #2d2d2d;
+  --vx-frame: #313131;
+  --vx-white: #fff;
+  --vx-black: #000;
+  --vx-text: #fff;
+  --vx-text-2: #949494;
+  --vx-text-muted: #e9e9e9;
+  --vx-link-hover: #3860be;
+  --vx-focus: #1eaedb;
+  --vx-mint-border: #309875;
+  --vx-purple-rule: #3d00bf;
+  --vx-ring: rgba(0, 0, 0, .33);
+  --vx-dim: #8c8c8c;
+  --vx-btn-hover: rgba(255, 255, 255, .2);
+  --vx-ring-hover: #c2c2c2;
+  /* 色块五色（DESIGN.md 只给了名字，值取 Verge 近似） */
+  --vx-tile-yellow: #ffd400;
+  --vx-tile-pink: #ff90e8;
+  --vx-tile-orange: #ff5c00;
+  --vx-tile-blue: #2b6bff;
+
+  /* 字号 */
+  --vx-fs-display: clamp(56px, 8vw, 107px);
+  --vx-fs-display-md: clamp(40px, 4.5vw, 60px);
+  --vx-fs-headline: 34px;
+  --vx-fs-title: 24px;
+  --vx-fs-whisper: 19px;
+  --vx-fs-body: 16px;
+  --vx-fs-body-sm: 13px;
+  --vx-fs-kicker: 12px;
+  --vx-fs-mono: 11px;
+
+  /* 字重 */
+  --vx-wt-display: 900;
+  --vx-wt-strong: 700;
+  --vx-wt-body: 500;
+  --vx-wt-light: 300;
+
+  /* 行高：展示紧、正文松 —— 这个落差是系统的节奏感来源 */
+  --vx-lh-display-cjk: 1.08;
+  --vx-lh-latin: .95;
+  --vx-lh-title: 1.15;
+  --vx-lh-label: 1.2;
+  --vx-lh-body: 1.6;
+
+  /* 字距：纯拉丁 1.1-1.5px；含中文一律走 -cjk 档 */
+  --vx-ls-kicker: .125em;
+  --vx-ls-kicker-cjk: .06em;
+  --vx-ls-mono: .1em;
+  --vx-ls-mono-cjk: .05em;
+  --vx-ls-whisper: .1em;
+  --vx-ls-whisper-cjk: .08em;
+  --vx-ls-display-cjk: .015em;
+
+  /* 半径八档 */
+  --vx-r-2: 2px;
+  --vx-r-3: 3px;
+  --vx-r-4: 4px;
+  --vx-r-20: 20px;
+  --vx-r-24: 24px;
+  --vx-r-30: 30px;
+  --vx-r-40: 40px;
+  --vx-r-round: 50%;
+
+  /* 间距（8px 基准）与节距 */
+  --vx-s-4: 4px;
+  --vx-s-6: 6px;
+  --vx-s-8: 8px;
+  --vx-s-10: 10px;
+  --vx-s-12: 12px;
+  --vx-s-16: 16px;
+  --vx-s-20: 20px;
+  --vx-s-24: 24px;
+  --vx-s-32: 32px;
+  --vx-s-40: 40px;
+  --vx-s-48: 48px;
+  --vx-s-64: 64px;
+
+  /* 布局 */
+  --vx-container: 1280px;
+  --vx-gutter: 48px;
+  --vx-col-gap: 24px;
+  --vx-rail-w: 160px;
+  --vx-nav-h: 64px;
+
+  /* 字体栈 */
+  --vx-font-display: "Anton", "Arial Narrow", Impact, sans-serif;
+  --vx-font-display-cjk: "Anton", "Arial Narrow", "Noto Sans SC", "Source Han Sans SC",
+                         "Microsoft YaHei", "PingFang SC", sans-serif;
+  --vx-font-ui: "Space Grotesk", "Helvetica Neue", Arial, "Noto Sans SC",
+                "Source Han Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+  --vx-font-mono: "Space Mono", "Courier New", "Noto Sans SC", "Microsoft YaHei", monospace;
+  --vx-font-serif: Georgia, "Noto Serif SC", "Source Han Serif SC", "Songti SC", SimSun, serif;
+
+  --vx-ease: cubic-bezier(.2, .6, .3, 1);
+}
+
+/* ------------------------------------------------------------------ 基础 */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--vx-nav-h) + 16px);
+  background: var(--vx-canvas);
+}
+
+body {
+  margin: 0;
+  background: var(--vx-canvas);
+  color: var(--vx-text);
+  font: var(--vx-wt-body) var(--vx-fs-body)/var(--vx-lh-body) var(--vx-font-ui);
+  -webkit-font-smoothing: antialiased;
+}
+
+img { display: block; max-width: 100%; height: auto; }
+
+a {
+  color: inherit;
+  text-decoration: none;         /* 全站无下划线，靠颜色表达可点 */
+  transition: color 150ms var(--vx-ease);
+}
+a:hover { color: var(--vx-link-hover); }   /* 全站唯一蓝，无论底色 */
+
+:focus-visible {
+  outline: 2px solid var(--vx-focus);
+  outline-offset: 2px;
+}
+
+/* 容器 */
+.wrap {
+  max-width: var(--vx-container);
+  margin-inline: auto;
+  padding-inline: var(--vx-gutter);
+}
+
+section { padding-block: var(--vx-s-64); }
+section + section { border-top: 1px solid var(--vx-slate); }
+
+/* ------------------------------------------------------------------ 排版件 */
+.kicker {
+  margin: 0;
+  font: 400 var(--vx-fs-kicker)/var(--vx-lh-label) var(--vx-font-mono);
+  letter-spacing: var(--vx-ls-kicker);
+  text-transform: uppercase;
+  color: var(--vx-mint);
+}
+/* 含中文的 kicker：字距换 -cjk 档，否则汉字被拉开。
+ * keep-all 阻止在汉字之间断行 —— 窄屏下「实时聚合」会被从中间劈开。 */
+.kicker-cjk { letter-spacing: var(--vx-ls-kicker-cjk); word-break: keep-all; }
+
+/* 细体大写「耳语」——与巨号标题对撞，是这套设计的排版指纹 */
+.whisper {
+  margin: 0;
+  font: var(--vx-wt-light) var(--vx-fs-whisper)/var(--vx-lh-label) var(--vx-font-ui);
+  letter-spacing: var(--vx-ls-whisper-cjk);
+  color: var(--vx-text-muted);
+}
+
+.sec-title {
+  margin: var(--vx-s-8) 0 0;
+  font: var(--vx-wt-display) var(--vx-fs-display-md)/var(--vx-lh-display-cjk) var(--vx-font-display-cjk);
+  letter-spacing: var(--vx-ls-display-cjk);
+}
+
+.sec-deck {
+  margin: var(--vx-s-16) 0 0;
+  max-width: 62ch;
+  font-size: var(--vx-fs-body);
+  line-height: var(--vx-lh-body);
+  color: var(--vx-text-muted);
+}
+
+.serif { font-family: var(--vx-font-serif); letter-spacing: -.01em; }
+
+.mono {
+  font-family: var(--vx-font-mono);
+  letter-spacing: var(--vx-ls-mono);
+  text-transform: uppercase;
+  color: var(--vx-text-2);
+}
+
+/* ------------------------------------------------------------------ 按钮 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--vx-s-8);
+  padding: var(--vx-s-10) var(--vx-s-24);
+  min-height: 44px;                 /* WCAG AA 触控目标 */
+  border: 0;
+  border-radius: var(--vx-r-24);
+  font: 600 var(--vx-fs-kicker)/2 var(--vx-font-mono);
+  letter-spacing: var(--vx-ls-kicker);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 180ms var(--vx-ease), box-shadow 180ms var(--vx-ease),
+              color 150ms var(--vx-ease);
+}
+/* 主 CTA：薄荷药丸。hover 唯一的阴影是那圈 1px 环 —— 全站唯一允许的 box-shadow */
+.btn-mint { background: var(--vx-mint); color: var(--vx-black); }
+.btn-mint:hover,
+.btn-mint:focus-visible {
+  background: var(--vx-btn-hover);
+  color: var(--vx-black);
+  box-shadow: 0 0 0 1px var(--vx-ring-hover);
+}
+.btn-mint:active { background: var(--vx-dim); color: var(--vx-black); }
+
+/* 次级：石板灰药丸 */
+.btn-slate { background: var(--vx-slate); color: var(--vx-text-muted); font-weight: 400; }
+.btn-slate:hover, .btn-slate:focus-visible {
+  background: var(--vx-btn-hover);
+  color: var(--vx-black);
+  box-shadow: 0 0 0 1px var(--vx-ring-hover);
+}
+
+/* 描边：40px 圆角，hover 反转填充 */
+.btn-outline {
+  background: transparent;
+  color: var(--vx-mint);
+  box-shadow: inset 0 0 0 1px var(--vx-mint);
+  border-radius: var(--vx-r-40);
+  transition: background-color 150ms var(--vx-ease), color 150ms var(--vx-ease);
+}
+.btn-outline:hover, .btn-outline:focus-visible {
+  background: var(--vx-mint);
+  color: var(--vx-black);
+}
+
+/* 紫外描边：促销语境 */
+.btn-outline-uv {
+  background: transparent;
+  color: var(--vx-white);
+  box-shadow: inset 0 0 0 1px var(--vx-ultraviolet);
+  border-radius: var(--vx-r-30);
+  transition: background-color 150ms var(--vx-ease), color 150ms var(--vx-ease);
+}
+.btn-outline-uv:hover, .btn-outline-uv:focus-visible {
+  background: var(--vx-ultraviolet-90);
+  color: var(--vx-white);
+}
+
+/* ------------------------------------------------------------------ 导航 */
+.nav {
+  position: sticky; top: 0; z-index: 10;
+  background: var(--vx-canvas);
+  border-bottom: 1px solid var(--vx-slate);
+}
+.nav-in {
+  display: flex; align-items: center; gap: var(--vx-s-32);
+  height: var(--vx-nav-h);
+}
+/* 字标是 Anton 允许 <60px 的唯一语境（DESIGN 响应式一节：字标 24-32px） */
+.nav-mark {
+  font: var(--vx-wt-display) 28px/1 var(--vx-font-display-cjk);
+  letter-spacing: var(--vx-ls-display-cjk);
+  margin-right: auto;
+}
+.nav-links { display: flex; gap: var(--vx-s-24); }
+.nav-links a {
+  font: 400 var(--vx-fs-kicker)/var(--vx-lh-label) var(--vx-font-mono);
+  letter-spacing: var(--vx-ls-kicker);
+  text-transform: uppercase;
+  color: var(--vx-text-2);
+}
+
+/* ------------------------------------------------------------------ Hero */
+.hero { padding-block: var(--vx-s-64) var(--vx-s-48); border-top: 0; }
+.hero-title {
+  margin: var(--vx-s-16) 0 0;
+  font: var(--vx-wt-display) var(--vx-fs-display)/var(--vx-lh-display-cjk) var(--vx-font-display-cjk);
+  letter-spacing: var(--vx-ls-display-cjk);
+}
+.hero .whisper { margin-top: var(--vx-s-16); }
+.hero-deck {
+  margin: var(--vx-s-20) 0 0;
+  max-width: 56ch;
+  font-size: var(--vx-fs-body);
+  line-height: 1.5;
+  color: var(--vx-text-muted);
+}
+.hero-cta {
+  display: flex; flex-wrap: wrap; gap: var(--vx-s-12);
+  margin-top: var(--vx-s-32);
+}
+.hero-shot { max-width: 1000px; }
+
+/* ------------------------------------------------------------------ 截图 */
+.shot { margin: var(--vx-s-32) 0 0; }
+/* 圆角 4px（嵌套卡内图档）——截图不是交互容器，不做 20px */
+.shot img {
+  width: 100%;
+  border-radius: var(--vx-r-4);
+  border: 1px solid var(--vx-frame);
+}
+.shot figcaption {
+  margin-top: var(--vx-s-10);
+  font: 400 var(--vx-fs-mono)/var(--vx-lh-label) var(--vx-font-mono);
+  letter-spacing: var(--vx-ls-mono);
+  text-transform: uppercase;
+  color: var(--vx-text-2);
+}
+.shot figcaption .cjk { letter-spacing: var(--vx-ls-mono-cjk); text-transform: none; word-break: keep-all; }
+/* 亮色块里的截图换深色帧，否则白边糊成一片 */
+.tile-light .shot img { border-color: rgba(19, 19, 19, .55); }
+.tile-light .shot figcaption { color: rgba(19, 19, 19, .62); }
+
+/* ------------------------------------------------------------------ StoryStream
+ * 竖虚线 + 左 rail 时间戳。像 git log 的 commit 堆叠。 */
+.stream { list-style: none; margin: var(--vx-s-40) 0 0; padding: 0; }
+.stream-item {
+  display: grid;
+  grid-template-columns: var(--vx-rail-w) minmax(0, 1fr);
+  column-gap: var(--vx-col-gap);
+  padding-bottom: var(--vx-s-16);
+}
+/* padding-right 让出圆点的位置：圆点在 right:0 处宽 9px，
+ * 不加内边距的话时间戳末位数字会被圆点盖住（实测重叠 9px）。 */
+.stream-rail {
+  position: relative; text-align: right;
+  padding-top: var(--vx-s-20);
+  padding-right: var(--vx-s-16);
+}
+/* 竖虚线：从当前条目延伸到下一条，末项不画 */
+.stream-rail::before {
+  content: "";
+  position: absolute;
+  top: 28px; bottom: calc(var(--vx-s-16) * -1); right: 4px;
+  border-left: 1px dashed var(--vx-purple-rule);
+}
+.stream-item:last-child .stream-rail::before { display: none; }
+.rail-dot {
+  position: absolute; top: 22px; right: 0;
+  width: 9px; height: 9px;
+  background: var(--vx-mint);
+  border-radius: var(--vx-r-2);   /* 小方块，不是圆点——系统的「近圆角」语言 */
+}
+.stream-time {
+  font: 500 var(--vx-fs-mono)/var(--vx-lh-label) var(--vx-font-mono);
+  letter-spacing: var(--vx-ls-mono);
+  text-transform: uppercase;
+  color: var(--vx-text-2);
+}
+/* 通栏破坏者：打断时间线节奏 */
+.stream-item.is-breaker { grid-template-columns: 1fr; padding-block: var(--vx-s-8); }
+
+/* 紧凑横排版色块：kicker | 标题 | 说明 三列。
+ * 时间线本来就该紧凑密集（像 changelog），
+ * 而且色块是主角 —— 塞进全屏截图会把颜色挤成一条边框，那就不是这套设计了。 */
+.tile-row {
+  display: grid;
+  grid-template-columns: 168px minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: var(--vx-s-24);
+  align-items: baseline;
+  padding: var(--vx-s-20) var(--vx-s-24);
+}
+.tile-row .tile-title { margin: 0; font-size: 21px; }
+.tile-row .tile-deck { margin: 0; font-size: var(--vx-fs-body-sm); }
+.tile-row .tile-kicker { padding-top: 2px; }
+/* 破坏者比常规条厚一档，才真的「打断」节奏 */
+.is-breaker .tile-row { padding-block: var(--vx-s-32); }
+
+/* 时间线之后的一张大图：可读尺寸，替掉五张看不清的缩略图 */
+.stream-shot { margin-top: var(--vx-s-48); }
+.stream-shot img { width: 100%; }
+
+@media (max-width: 1023px) {
+  .tile-row { grid-template-columns: 1fr; gap: var(--vx-s-8); }
+}
+
+
+/* ------------------------------------------------------------------ 色块 tile */
+.tile {
+  border-radius: var(--vx-r-20);
+  padding: var(--vx-s-32);
+  border: 1px solid transparent;
+}
+.tile-feature { border-radius: var(--vx-r-24); }
+
+.tile-dark   { background: var(--vx-canvas);  border-color: var(--vx-white); }
+.tile-slate  { background: var(--vx-slate);   color: var(--vx-text-muted); }
+.tile-mint   { background: var(--vx-mint);    color: var(--vx-black); border-color: var(--vx-mint-border); }
+.tile-purple { background: var(--vx-ultraviolet-90); color: var(--vx-white); }
+.tile-yellow { background: var(--vx-tile-yellow); color: var(--vx-black); }
+.tile-white  { background: var(--vx-white);   color: var(--vx-black); }
+.tile-pink   { background: var(--vx-tile-pink); color: var(--vx-black); }
+.tile-orange { background: var(--vx-tile-orange); color: var(--vx-black); }
+.tile-blue   { background: var(--vx-tile-blue); color: var(--vx-white); }
+
+/* 色块内的次级文字：靠 opacity 降调，不引新色 */
+.tile-mint .tile-deck, .tile-yellow .tile-deck, .tile-white .tile-deck,
+.tile-pink .tile-deck, .tile-orange .tile-deck { opacity: .78; }
+.tile-purple .tile-deck, .tile-blue .tile-deck { opacity: .85; }
+.tile-slate .tile-deck { color: var(--vx-text-muted); opacity: .82; }
+
+.tile-kicker {
+  font: 600 var(--vx-fs-kicker)/var(--vx-lh-label) var(--vx-font-mono);
+  letter-spacing: var(--vx-ls-kicker);
+  text-transform: uppercase;
+  opacity: .72;
+}
+.tile-kicker-cjk { letter-spacing: var(--vx-ls-kicker-cjk); word-break: keep-all; }
+.tile-title {
+  margin: var(--vx-s-8) 0 0;
+  font: var(--vx-wt-strong) var(--vx-fs-title)/var(--vx-lh-title) var(--vx-font-ui);
+  letter-spacing: var(--vx-ls-display-cjk);
+}
+.tile-deck { margin: var(--vx-s-12) 0 0; max-width: 62ch; font-size: var(--vx-fs-body-sm); line-height: var(--vx-lh-body); }
+.tile .shot { margin-top: var(--vx-s-20); }
+/* tile 不是链接，hover 完全静止（无抬升、无缩放、无变色） */
+
+/* 药丸标签（不可点） */
+.tag {
+  display: inline-block;
+  padding: var(--vx-s-4) var(--vx-s-10);
+  border-radius: var(--vx-r-20);
+  font: 600 var(--vx-fs-mono)/1.5 var(--vx-font-mono);
+  letter-spacing: var(--vx-ls-mono);
+  text-transform: uppercase;
+  background: var(--vx-slate);
+  color: var(--vx-text-muted);
+}
+.tag-mint   { background: var(--vx-mint); color: var(--vx-black); }
+.tag-white  { background: var(--vx-white); color: var(--vx-black); }
+.tag-purple { background: var(--vx-ultraviolet); color: var(--vx-white); }
+.tag-outline { background: transparent; box-shadow: inset 0 0 0 1px var(--vx-white); }
+.tag-cjk { letter-spacing: var(--vx-ls-mono-cjk); text-transform: none; word-break: keep-all; }
+
+/* 筛选演示用的 chips（静态示意，不是真控件） */
+.chip-row { display: flex; flex-wrap: wrap; gap: var(--vx-s-8); margin-top: var(--vx-s-16); }
+.chip {
+  display: inline-flex; align-items: center; gap: var(--vx-s-6);
+  padding: var(--vx-s-4) var(--vx-s-10);
+  border-radius: var(--vx-r-20);
+  box-shadow: inset 0 0 0 1px var(--vx-white);
+  font: 400 var(--vx-fs-body-sm)/1.5 var(--vx-font-ui);
+  color: var(--vx-white);
+}
+.chip-n {
+  font: 500 var(--vx-fs-mono)/1 var(--vx-font-mono);
+  letter-spacing: 0; color: var(--vx-text-2);
+}
+.chip-on { background: var(--vx-mint); box-shadow: none; color: var(--vx-black); }
+.chip-on .chip-n { color: rgba(0, 0, 0, .55); }
+
+/* ------------------------------------------------------------------ 栅格 */
+/* align-items:start —— 不让纯文字卡被旁边有截图的高卡拉长留一大片空白。
+ * 色块高度不齐本来就是这套设计的语言（DESIGN.md：色块 tile 随意跨列）。 */
+.grid {
+  display: grid; align-items: start;
+  gap: var(--vx-col-gap); margin-top: var(--vx-s-40);
+}
+.grid-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+.grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* 统计用 3 列 × 2 行而不是 6 列一行：6 列时每格内容宽只有约 120px，
+ * 64px 的「15MIN」「100%」会直接溢出卡片边界，实测过。 */
+.grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.sp-7 { grid-column: span 7; }
+.sp-5 { grid-column: span 5; }
+.sp-4 { grid-column: span 4; }
+.sp-6 { grid-column: span 6; }
+.sp-12 { grid-column: span 12; }
+
+/* 大数字 */
+.stat { text-align: left; overflow: hidden; }   /* 兜住极端窄屏 */
+.stat-num {
+  /* 纯拉丁数字走 Anton（display 栈），中文（如「3天」的「天」）落 CJK 栈。
+   * 5vw 让桌面端落在 64-72px —— display 字体有「只用于 ≥60px」的铁律。
+   * 窄屏按比例降是正常的响应式行为，那条铁律没法在手机上成立。 */
+  font: 400 clamp(40px, 5vw, 72px)/var(--vx-lh-latin) var(--vx-font-display);
+  letter-spacing: .01em;
+  white-space: nowrap;
+}
+.stat-label {
+  margin-top: var(--vx-s-8);
+  font: 400 var(--vx-fs-mono)/var(--vx-lh-label) var(--vx-font-mono);
+  letter-spacing: var(--vx-ls-mono-cjk);
+  text-transform: uppercase;
+  opacity: .72;
+}
+
+/* 文档预览（CAP 05 用）：白色纸块上叠一层边框，示意导出的 docx 版式 */
+.doc-mock {
+  margin-top: var(--vx-s-20);
+  padding: var(--vx-s-16);
+  border-radius: var(--vx-r-4);
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(19, 19, 19, .22);
+  color: var(--vx-black);
+}
+.doc-mock-head {
+  font: 700 var(--vx-fs-body-sm)/var(--vx-lh-title) var(--vx-font-ui);
+  padding-bottom: var(--vx-s-8);
+  border-bottom: 1px solid rgba(19, 19, 19, .16);
+}
+.doc-mock-meta {
+  margin-top: var(--vx-s-6);
+  font: 400 var(--vx-fs-mono)/var(--vx-lh-label) var(--vx-font-mono);
+  letter-spacing: var(--vx-ls-mono-cjk);
+  color: rgba(19, 19, 19, .55);
+}
+.doc-mock-body { margin-top: var(--vx-s-12); }
+/* 用灰条示意正文，避免塞假内容 */
+.doc-mock-line {
+  height: 7px; border-radius: var(--vx-r-2);
+  background: rgba(19, 19, 19, .14);
+}
+.doc-mock-line + .doc-mock-line { margin-top: var(--vx-s-8); }
+.doc-mock-line.w-80 { width: 80%; }
+.doc-mock-line.w-65 { width: 65%; }
+.doc-mock-line.w-90 { width: 90%; }
+.doc-mock-line.is-strong { background: rgba(19, 19, 19, .3); height: 9px; }
+
+/* 边界情况列表（导出区） */
+.edge-list { margin: var(--vx-s-20) 0 0; padding: 0; list-style: none; }
+.edge-list li {
+  display: grid; grid-template-columns: 16px 1fr; gap: var(--vx-s-10);
+  font-size: var(--vx-fs-body-sm); line-height: var(--vx-lh-body);
+}
+.edge-list li + li { margin-top: var(--vx-s-12); }
+.edge-list li::before {
+  content: "—"; color: var(--vx-text-2);
+  font-family: var(--vx-font-mono);
+}
+
+/* 步骤列表 */
+.steps { margin: 0; padding: 0; list-style: none; }
+.step { display: grid; grid-template-columns: 48px 1fr; gap: var(--vx-s-16); }
+.step + .step { margin-top: var(--vx-s-20); }
+.step-n {
+  font: 700 var(--vx-fs-kicker)/var(--vx-lh-label) var(--vx-font-mono);
+  letter-spacing: var(--vx-ls-mono);
+  color: var(--vx-text-2);
+}
+.step-t { margin: 0; font-weight: var(--vx-wt-strong); font-size: var(--vx-fs-body); }
+.step-d { margin: var(--vx-s-4) 0 0; font-size: var(--vx-fs-body-sm); line-height: var(--vx-lh-body); opacity: .82; }
+
+/* 管道图（mono 通栏） */
+.pipe {
+  font: 400 var(--vx-fs-body-sm)/1.9 var(--vx-font-mono);
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+/* 收尾 CTA 带 */
+.cta-band {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--vx-s-20);
+  justify-content: space-between;
+  margin-top: var(--vx-s-40);
+  padding: var(--vx-s-32);
+  border-radius: var(--vx-r-30);
+  box-shadow: inset 0 0 0 1px var(--vx-ultraviolet);
+}
+/* 用 UI 栈不用 display 栈：DISPLAY 字体有「只用于 ≥60px」的铁律，这里才 24px */
+.cta-band p { margin: 0; font: var(--vx-wt-strong) var(--vx-fs-title)/var(--vx-lh-title) var(--vx-font-ui); letter-spacing: var(--vx-ls-display-cjk); }
+
+/* ------------------------------------------------------------------ 页脚 */
+.foot { border-top: 1px solid var(--vx-slate); padding-block: var(--vx-s-48); }
+.foot-grid {
+  display: grid; grid-template-columns: 2fr 1fr 1fr; gap: var(--vx-s-32);
+}
+.foot-mark {
+  font: var(--vx-wt-display) 32px/1 var(--vx-font-display-cjk);
+  letter-spacing: var(--vx-ls-display-cjk);
+}
+.foot-quote { margin: var(--vx-s-12) 0 0; font-size: var(--vx-fs-body-sm); color: var(--vx-text-2); }
+.foot-col h4 {
+  margin: 0 0 var(--vx-s-12);
+  font: 600 var(--vx-fs-mono)/var(--vx-lh-label) var(--vx-font-mono);
+  letter-spacing: var(--vx-ls-mono);
+  text-transform: uppercase;
+  color: var(--vx-text-2);
+}
+.foot-col a, .foot-col p {
+  display: block; margin: 0 0 var(--vx-s-8);
+  font: 400 var(--vx-fs-body-sm)/var(--vx-lh-body) var(--vx-font-ui);
+  color: var(--vx-text-muted);
+}
+.foot-bottom {
+  display: flex; flex-wrap: wrap; gap: var(--vx-s-16); justify-content: space-between;
+  margin-top: var(--vx-s-40); padding-top: var(--vx-s-20);
+  border-top: 1px solid var(--vx-slate);
+  font: 400 var(--vx-fs-mono)/var(--vx-lh-label) var(--vx-font-mono);
+  letter-spacing: var(--vx-ls-mono);
+  text-transform: uppercase;
+  color: var(--vx-text-2);
+}
+.foot-bottom .cjk { letter-spacing: var(--vx-ls-mono-cjk); text-transform: none; word-break: keep-all; }
+
+/* 跳转链接（页脚用） */
+.jump {
+  display: inline-flex; align-items: center; gap: var(--vx-s-8);
+  margin-top: var(--vx-s-16);
+  font: 600 var(--vx-fs-kicker)/var(--vx-lh-label) var(--vx-font-mono);
+  letter-spacing: var(--vx-ls-kicker);
+  text-transform: uppercase;
+  color: var(--vx-mint);
+}
+
+/* ------------------------------------------------------------------ 响应式
+ * 断点：400 / 550 / 768 / 1024 / 1180 / 1300
+ * mono 标签恒钉在 11-12px 不缩；色块 tile 不降饱和，只重排 */
+
+@media (max-width: 1179px) {
+  .sp-7, .sp-5, .sp-4, .sp-6 { grid-column: span 12; }
+  .grid-12 { grid-template-columns: 1fr; }
+  .pipe { font-size: 12px; }
+}
+
+@media (max-width: 1023px) {
+  :root { --vx-gutter: 32px; --vx-rail-w: 120px; }
+  .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 767px) {
+  :root { --vx-gutter: 24px; --vx-s-64: 40px; }
+  .nav-links { display: none; }        /* 5 个锚点不值得引 JS 抽屉，直接收起留 CTA */
+  .nav-mark { font-size: 22px; }
+  .stream-item { grid-template-columns: 1fr; row-gap: var(--vx-s-8); }
+  .stream-rail { text-align: left; padding-top: 0; }
+  .stream-rail::before { display: none; }   /* 窄屏藏掉竖线，时间戳内联在标题上方 */
+  .rail-dot { display: none; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .foot-grid { grid-template-columns: 1fr; }
+  .tile { padding: var(--vx-s-24); }
+  .hero-shot { max-width: none; }
+}
+
+@media (max-width: 549px) {
+  :root { --vx-gutter: 20px; }
+  .grid-3 { grid-template-columns: 1fr; }
+  .hero-cta .btn { width: 100%; justify-content: center; }
+  .cta-band { flex-direction: column; align-items: flex-start; }
+}
+
+@media (max-width: 399px) {
+  .hero-title { font-size: 48px; }
+  .sec-title { font-size: 32px; }
+}
+
+/* 尊重动效偏好 */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: .01ms !important; }
+}

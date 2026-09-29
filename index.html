@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>新闻雷达 · 本地优先的新闻终端</title>
+<meta name="description" content="33 个数据源的实时新闻聚合看板。四大视图、时间与来源筛选、五个 AI 能力、多选导出 Word。全部运行在本机 127.0.0.1，无云端、无账号。">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<!-- 零 CDN：字体与样式全部本地（构建期由 tools/fetch_fonts.py 准备） -->
+<!-- 资源一律相对路径：本机由 /site/ 挂载提供，传到 Cloudflare Pages 后同样成立，
+     一套文件两处通用，不用维护两份 -->
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+
+<!-- ============================================================ 导航 -->
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="nav-mark" href="#top">新闻雷达</a>
+    <nav class="nav-links" aria-label="页面导航">
+      <a href="#views">Views</a>
+      <a href="#filters">Filters</a>
+      <a href="#ai">AI</a>
+      <a href="#export">Export</a>
+      <a href="#stats">Stats</a>
+    </nav>
+    <a class="btn btn-mint" href="https://github.com/TQ66688/news-radar-site" rel="noopener">项目主页</a>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ============================================================ Hero -->
+<section class="hero wrap" aria-labelledby="hero-h">
+  <p class="kicker kicker-cjk">Local-first news terminal · 本地优先 · 实时聚合</p>
+  <h1 class="hero-title" id="hero-h">新闻雷达</h1>
+  <p class="whisper">33 个数据源 · 四大视图 · WebSocket 实时推送</p>
+  <p class="hero-deck serif">
+    微博、百度、知乎、头条、B站、抖音，加上 36氪、财联社、澎湃、Hacker News、CGTN、NPR……
+    三十三个源按各自的节奏轮询，新内容不等你刷新，自己走到屏幕上。
+    没有云端，没有账号，一切运行在 127.0.0.1:8850。
+  </p>
+  <div class="hero-cta">
+    <a class="btn btn-mint" href="https://github.com/TQ66688/news-radar-site" rel="noopener">项目主页</a>
+    <a class="btn btn-outline" href="#views">查看四大视图</a>
+  </div>
+  <figure class="shot hero-shot">
+    <img src="img/boards.png" width="1680" height="1400" fetchpriority="high"
+         alt="新闻雷达看板视图：六个国内热榜并排，每条带热度条与排名升降">
+    <figcaption>Fig. 01 — <span class="cjk">看板视图 · 六大热榜并排 · 90 秒轮询</span></figcaption>
+  </figure>
+</section>
+
+<!-- ==================================================== StoryStream 四视图 -->
+<section class="wrap" id="views" aria-labelledby="views-h">
+  <p class="kicker kicker-cjk">The four views · 四大视图</p>
+  <h2 class="sec-title" id="views-h">四块屏幕，四个节奏。</h2>
+  <p class="sec-deck">
+    看板、信息流、财经、搜索 —— 数字键 1 / 2 / 3 一键切换，斜杠唤起搜索框。
+    每一条都点得开：热度趋势曲线、跨源相关资讯、AI 解读。
+  </p>
+
+  <ol class="stream">
+
+    <li class="stream-item">
+      <div class="stream-rail">
+        <span class="rail-dot" aria-hidden="true"></span>
+        <time class="stream-time">T+00:00</time>
+      </div>
+      <article class="tile tile-mint tile-row">
+        <p class="tile-kicker">View 01 · 看板</p>
+        <h3 class="tile-title">六大热榜并排，升降一眼看尽。</h3>
+        <p class="tile-deck">微博 / 百度 / 知乎 / 头条 / B站 / 抖音，热度条 + 排名变化，90 秒一轮。</p>
+      </article>
+    </li>
+
+    <li class="stream-item">
+      <div class="stream-rail">
+        <span class="rail-dot" aria-hidden="true"></span>
+        <time class="stream-time">T+00:01</time>
+      </div>
+      <article class="tile tile-dark tile-row">
+        <p class="tile-kicker">View 02 · 信息流</p>
+        <h3 class="tile-title">按时间倒序，按天分组。</h3>
+        <p class="tile-deck">10 国内 + 17 国际源。滚到顶部才插入新条目，不打断你在读的东西。</p>
+      </article>
+    </li>
+
+    <li class="stream-item is-breaker">
+      <article class="tile tile-yellow tile-feature tile-row">
+        <p class="tile-kicker">Bonus · 详情抽屉</p>
+        <h3 class="tile-title">点开任何一条。</h3>
+        <p class="tile-deck">热度趋势曲线 / 跨源相关资讯 / AI 解读，点标题开，Esc 关。</p>
+      </article>
+    </li>
+
+    <li class="stream-item">
+      <div class="stream-rail">
+        <span class="rail-dot" aria-hidden="true"></span>
+        <time class="stream-time">T+00:02</time>
+      </div>
+      <article class="tile tile-purple tile-row">
+        <p class="tile-kicker">View 03 · 财经</p>
+        <h3 class="tile-title">财经专线。</h3>
+        <p class="tile-deck">6 个财经源全量 + 全源 18 个股票词命中，热榜里的股票话题也进来。</p>
+      </article>
+    </li>
+
+    <li class="stream-item">
+      <div class="stream-rail">
+        <span class="rail-dot" aria-hidden="true"></span>
+        <time class="stream-time">T+00:03</time>
+      </div>
+      <article class="tile tile-white tile-row">
+        <p class="tile-kicker">View 04 · 搜索</p>
+        <h3 class="tile-title">全源检索。</h3>
+        <p class="tile-deck">切词打分，多词主题也命中；「AI 找」的列表每条都点得开。</p>
+      </article>
+    </li>
+
+  </ol>
+
+  <figure class="shot stream-shot">
+    <img src="img/finance.png" width="1680" height="1400" loading="lazy"
+         alt="财经专线视图：来源筛选 chips、时间档与条目列表">
+    <figcaption>Fig. 02 — <span class="cjk">财经专线：来源 chips、时间四档、条目列表</span></figcaption>
+  </figure>
+</section>
+
+<!-- ============================================================ 筛选 -->
+<section class="wrap" id="filters" aria-labelledby="filters-h">
+  <p class="kicker kicker-cjk">Filters · 筛选</p>
+  <h2 class="sec-title" id="filters-h">时间四档，来源自由。</h2>
+  <p class="sec-deck">
+    信息流与财经的时间过滤在服务端做，而且发生在条数截断之前 —— 否则「近 7 天」会先被 limit 吃掉。
+    搜索与 AI 找在本地过滤，切档零请求。时间档是全站共享的：在信息流切到近 3 天，切去财经会自动跟随。
+  </p>
+
+  <div class="grid grid-2">
+    <article class="tile tile-slate">
+      <p class="tile-kicker">01 · 时间四档</p>
+      <h3 class="tile-title">全部时间 / 今天 / 近 3 天 / 近 7 天</h3>
+      <p class="tile-deck">
+        时间档激活时，没有发布时间的条目会被排除 —— 不拿抓取时间冒充发布时间，
+        否则这些条目会集体插到最前面把信息流刷屏。
+      </p>
+      <div class="chip-row">
+        <span class="tag tag-mint tag-cjk">全部时间</span>
+        <span class="tag tag-white tag-cjk">今天</span>
+        <span class="tag tag-purple tag-cjk">近 3 天</span>
+        <span class="tag tag-outline tag-cjk">近 7 天</span>
+      </div>
+    </article>
+
+    <article class="tile tile-dark">
+      <p class="tile-kicker">02 · 来源筛选</p>
+      <h3 class="tile-title">只看你在意的那几家。</h3>
+      <p class="tile-deck">
+        每个视图一条 chips，列出当前数据里实际出现的源和条数。三个视图各自独立，
+        互不干扰 —— 信息流那边选的和财经这边选的是两回事。
+      </p>
+      <div class="chip-row">
+        <span class="chip chip-on">全部 <span class="chip-n">186</span></span>
+        <span class="chip">36氪 <span class="chip-n">24</span></span>
+        <span class="chip">财联社 <span class="chip-n">41</span></span>
+        <span class="chip">Hacker News <span class="chip-n">12</span></span>
+      </div>
+    </article>
+  </div>
+
+  <figure class="shot">
+    <img src="img/feed.png" width="1680" height="1400" loading="lazy"
+         alt="信息流视图，顶部有来源筛选 chips 与时间档选择">
+    <figcaption>Fig. 03 — <span class="cjk">筛选叠加：时间档 + 来源 chips</span></figcaption>
+  </figure>
+</section>
+
+<!-- ============================================================ AI -->
+<section class="wrap" id="ai" aria-labelledby="ai-h">
+  <p class="kicker kicker-cjk">AI · Five capabilities</p>
+  <h2 class="sec-title" id="ai-h">五个能力，一个 Key。</h2>
+  <p class="sec-deck">
+    Key 只写在本机 data/settings.json，界面里只回显掩码，不出本机。
+    简报、解读、找新闻是流式输出边生成边渲染；翻译与导出简报走非流式接口，
+    因为结果要按原文回填到对应条目上，流式 Markdown 对不上号。
+  </p>
+
+  <div class="grid grid-12">
+    <article class="tile tile-mint sp-7">
+      <p class="tile-kicker">Cap 01 · AI 简报</p>
+      <h3 class="tile-title">把当前所有源的头部条目，写成一份四段式今日简报。</h3>
+      <p class="tile-deck">今日焦点 / 国内热点 / 国际动向 / 值得关注，同一事件的重复条目会合并。</p>
+      <figure class="shot">
+        <img src="img/ai.png" width="1680" height="1400" loading="lazy" alt="AI 简报面板">
+        <figcaption>Fig. 04 — <span class="cjk">AI 简报 · 流式生成</span></figcaption>
+      </figure>
+    </article>
+
+    <article class="tile tile-purple sp-5">
+      <p class="tile-kicker">Cap 02 · 自动翻译</p>
+      <h3 class="tile-title">英文标题下面直接是中文。</h3>
+      <p class="tile-deck">
+        不需要点按钮。打开英文条目时摘要也自动翻译，结果三层缓存，重复内容不再消耗配额。
+      </p>
+      <figure class="shot">
+        <img src="img/feed-tr.png" width="1680" height="1400" loading="lazy"
+             alt="信息流里英文标题下方的中文译文">
+        <figcaption>Fig. 05 — <span class="cjk">译文在原文下方</span></figcaption>
+      </figure>
+    </article>
+
+    <article class="tile tile-slate sp-4">
+      <p class="tile-kicker">Cap 03 · AI 解读</p>
+      <h3 class="tile-title">这个词条到底怎么回事。</h3>
+      <p class="tile-deck">会带上跨源的相关条目当上下文，解释来龙去脉而不是复述标题。</p>
+      <figure class="shot">
+        <img src="img/detail-tr.png" width="1680" height="1400" loading="lazy"
+             alt="详情抽屉里的 AI 解读与摘要翻译">
+        <figcaption>Fig. 06 — <span class="cjk">详情抽屉</span></figcaption>
+      </figure>
+    </article>
+
+    <article class="tile tile-dark sp-4">
+      <p class="tile-kicker">Cap 04 · AI 找</p>
+      <h3 class="tile-title">检索走本地，AI 只写总览。</h3>
+      <p class="tile-deck">
+        所以列表 100% 可靠、每条都点得开；没配 Key 或模型报错时，列表照常显示。
+      </p>
+      <figure class="shot">
+        <img src="img/aifind.png" width="1680" height="1400" loading="lazy"
+             alt="AI 找的主题总览与结果列表">
+        <figcaption>Fig. 07 — <span class="cjk">主题总览 + 结果</span></figcaption>
+      </figure>
+    </article>
+
+    <article class="tile tile-white sp-4">
+      <p class="tile-kicker">Cap 05 · 导出简报</p>
+      <h3 class="tile-title">给勾选的那批条目写一段简报。</h3>
+      <p class="tile-deck">300 字以内、要点式，附在导出文档的开头，后面才是条目列表。</p>
+      <div class="doc-mock" aria-hidden="true">
+        <p class="doc-mock-head">新闻雷达 · 精选导出</p>
+        <p class="doc-mock-meta">导出时间 15:20 · 共 3 条</p>
+        <div class="doc-mock-body">
+          <div class="doc-mock-line is-strong w-65"></div>
+          <div class="doc-mock-line w-90"></div>
+          <div class="doc-mock-line w-80"></div>
+          <div class="doc-mock-line w-90"></div>
+          <div class="doc-mock-line w-65"></div>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ============================================================ 导出 -->
+<section class="wrap" id="export" aria-labelledby="export-h">
+  <p class="kicker kicker-cjk">Export · 多选导出</p>
+  <h2 class="sec-title" id="export-h">勾选，导出，带走。</h2>
+  <p class="sec-deck">
+    三个列表都能勾选，选中态跨视图累计 —— 信息流勾两条、财经勾两条、搜索再勾两条，一起导出。
+    切视图、实时推送重渲染、手动刷新都不会丢，因为它存在状态里而不是 DOM 上。上限 200 条。
+  </p>
+
+  <div class="grid grid-12">
+    <article class="tile tile-slate sp-5">
+      <p class="tile-kicker">Workflow</p>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-n">01</span>
+          <div><p class="step-t">勾选</p>
+            <p class="step-d">三个列表行首都有复选框，点框只勾选，点标题才开详情。</p></div>
+        </li>
+        <li class="step">
+          <span class="step-n">02</span>
+          <div><p class="step-t">跨视图累计</p>
+            <p class="step-d">底部浮出「已选 N 条 · 全选 · 清除 · 导出」。</p></div>
+        </li>
+        <li class="step">
+          <span class="step-n">03</span>
+          <div><p class="step-t">选格式</p>
+            <p class="step-d">Word (.docx) 或 Markdown (.md)，中文文件名。</p></div>
+        </li>
+        <li class="step">
+          <span class="step-n">04</span>
+          <div><p class="step-t">附 AI 简报</p>
+            <p class="step-d">可选。针对你选的这批条目写，不是全源摘要。</p></div>
+        </li>
+      </ol>
+    </article>
+
+    <figure class="shot sp-7" style="margin-top:0">
+      <img src="img/multiselect.png" width="1680" height="1400" loading="lazy"
+           alt="多选状态：勾选的行高亮，底部浮出操作栏">
+      <figcaption>Fig. 08 — <span class="cjk">多选状态与底部操作栏</span></figcaption>
+    </figure>
+
+    <figure class="shot sp-7" style="margin-top:0">
+      <img src="img/export.png" width="1680" height="1400" loading="lazy"
+           alt="导出弹窗：格式选择与「附 AI 简报分析」">
+      <figcaption>Fig. 09 — <span class="cjk">导出弹窗</span></figcaption>
+    </figure>
+
+    <article class="tile tile-dark sp-5" style="margin-top:0">
+      <p class="tile-kicker">Edge cases</p>
+      <h3 class="tile-title">失败不挡路。</h3>
+      <p class="tile-deck">
+        AI 简报生成失败时，文档照常下载，只是不含简报段，界面会明确告诉你。
+        没配 Key 时这个选项直接禁用，并给一个跳到 AI 设置的入口 —— 而不是让你点了才发现不行。
+      </p>
+      <ul class="edge-list">
+        <li>简报失败 → 仍出纯列表文档 + 提示，不阻断下载</li>
+        <li>未配置 Key → 选项禁用 + 「打开 AI 设置」入口</li>
+        <li>单次上限 200 条，超出会明确拒绝而不是静默截断</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+<!-- ============================================================ 大数字 -->
+<section class="wrap" id="stats" aria-labelledby="stats-h">
+  <p class="kicker kicker-cjk">By the numbers · 数字</p>
+  <h2 class="sec-title" id="stats-h">本地跑，数字说话。</h2>
+
+  <div class="grid grid-3">
+    <article class="tile tile-mint stat">
+      <p class="stat-num">33</p>
+      <p class="stat-label">数据源 · 6 热榜 + 10 国内 + 17 国际</p>
+    </article>
+    <article class="tile tile-purple stat">
+      <p class="stat-num">90S</p>
+      <p class="stat-label">热榜轮询 · 国内 240S · 国际 300S</p>
+    </article>
+    <article class="tile tile-slate stat">
+      <p class="stat-num">15MIN</p>
+      <p class="stat-label">SQLite 快照 · 趋势曲线来源</p>
+    </article>
+    <article class="tile tile-dark stat">
+      <p class="stat-num">3天</p>
+      <p class="stat-label">快照保留 · 滚动清理</p>
+    </article>
+    <article class="tile tile-yellow stat">
+      <p class="stat-num">0</p>
+      <p class="stat-label">手动刷新 · WebSocket 直推</p>
+    </article>
+    <article class="tile tile-white stat">
+      <p class="stat-num">100%</p>
+      <p class="stat-label">本地 · Key 不出本机</p>
+    </article>
+  </div>
+
+  <article class="tile tile-slate" style="margin-top:var(--vx-col-gap)">
+    <p class="tile-kicker">How it flows</p>
+    <p class="pipe">
+      sources/*.py → fetcher.py → hub.py（内存态）→ WebSocket → 前端<br>
+      store.py（SQLite 快照 · 每 15 分钟 · 保留 3 天）
+    </p>
+  </article>
+
+  <div class="cta-band">
+    <p>打开应用，30 秒进入雷达。</p>
+    <a class="btn btn-outline-uv" href="https://github.com/TQ66688/news-radar-site" rel="noopener">项目主页</a>
+  </div>
+</section>
+
+</main>
+
+<!-- ============================================================ 页脚 -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <p class="foot-mark">新闻雷达</p>
+        <p class="foot-quote serif">「本地优先的新闻终端。」</p>
+      </div>
+      <div class="foot-col">
+        <h4>Sections</h4>
+        <a href="#views">四大视图</a>
+        <a href="#filters">筛选</a>
+        <a href="#ai">AI 能力</a>
+        <a href="#export">导出</a>
+        <a href="#stats">数字</a>
+      </div>
+      <div class="foot-col">
+        <h4>Runtime</h4>
+        <p>127.0.0.1:8850</p>
+        <p>Zero CDN</p>
+        <p>FastAPI + WebSocket</p>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 <span class="cjk">新闻雷达 · 无云 · 无账号</span></span>
+      <a href="https://github.com/TQ66688/news-radar-site" rel="noopener">GitHub →</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
