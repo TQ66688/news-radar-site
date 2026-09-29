@@ -1,0 +1,9 @@
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
+
+# wrangler 生成的部署配置：本地留着 deploy 要用，但没必要出现在仓库页面上
+wrangler.jsonc

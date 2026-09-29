@@ -1,0 +1,18 @@
+# 只把网站本体传上去，仓库的元数据一律排除。
+# 不加这个，wrangler 会把 assets.directory（"."）整个打包 —— 包括 .git/，
+# 结果 /git/HEAD、/.git/config 都能从公网直接取到（实测过）。
+
+# git 内部结构：绝不能公开
+.git
+
+# 仓库与工具链的元数据：传上去没用，只会污染站点根目录
+.gitignore
+.assetsignore
+wrangler.jsonc
+.wrangler
+.dev.vars*
+.env*
+
+# 赞赏码只在仓库 README 里出现，不上产品页。
+# 如果哪天想让它也出现在网站上，把这行删掉再重新部署即可。
+assets
